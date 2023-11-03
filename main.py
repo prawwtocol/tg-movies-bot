@@ -31,38 +31,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyboard = [
         [
             InlineKeyboardButton(
-                "1",
-                callback_data=v2[0]["id"],
+                f"{i}",
+                callback_data=x["id"],
             )
-        ],
-        [
-            InlineKeyboardButton(
-                "2",
-                callback_data=v2[1]["id"],
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                "3",
-                callback_data=v2[2]["id"],
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                "4",
-                callback_data=v2[3]["id"],
-            )
-        ],
+        ]
+        for i, x in enumerate(v2)
     ]
+
+    message = [
+        f'{i}: {x["title"]} [{x["release_date"]}] {x["overview"]}'
+        for i, x in enumerate(v2)
+    ]
+
     await update.message.reply_text(
-        f"""
-1: {v2[0]["title"]}[{v2[0]["release_date"]}]{v2[0]["overview"]}
-
-2: {v2[1]["title"]}[{v2[1]["release_date"]}]{v2[1]["overview"]}
-
-3: {v2[2]["title"]}[{v2[2]["release_date"]}]{v2[2]["overview"]}
-
-4:{v2[3]["title"]}[{v2[3]["release_date"]}]{v2[3]["overview"]}""",
+        '\n\n\n'.join(message),
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
@@ -84,7 +66,9 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     response = requests.post(url, json=payload, headers=headers)
     # TODO if response 2xx
-    await query.edit_message_text(f"Added movie with id {query.data} to watchlist")
+    await query.edit_message_text(
+        f"Added movie with id {query.data} to watchlist"
+    )
     pass
 
 
