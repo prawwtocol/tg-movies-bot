@@ -4,3 +4,5 @@ venv
 secret.py
 *.code-workspace
 server.sh
+bot2
+fiddle*

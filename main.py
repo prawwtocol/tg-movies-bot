@@ -16,7 +16,7 @@ import json
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     movie_name = update.message.text
-    url = f"https://api.themoviedb.org/3/search/movie?query={movie_name}"
+    url = f"https://api.themoviedb.org/3/search/multi?query={movie_name}"
 
     headers = {
         "accept": "application/json",
@@ -30,25 +30,30 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     v1 = json.loads(response.content)
     v2 = v1["results"][:4]
 
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                f"{i}",
-                callback_data=x["id"],
-            )
+    if not v2:
+        await update.message.reply_text(f"No movie found for: {movie_name}")
+    else:
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    f"{i}",
+                    callback_data=x["id"],
+                )
+            ]
+            for i, x in enumerate(v2)
         ]
-        for i, x in enumerate(v2)
-    ]
 
-    message = [
-        f'{i}: {x["title"]} [{x["release_date"]}] {x["overview"]}'
-        for i, x in enumerate(v2)
-    ]
+        message = [
+            f'{i}: {x["title"]} [{x["release_date"]}] {x["overview"]}'
+            if "title" in x.keys()
+            else f'{i}: {x["name"]} [{x["first_air_date"]}] {x["overview"]}'
+            for i, x in enumerate(v2)
+        ]
 
-    await update.message.reply_text(
-        "\n\n\n".join(message),
-        reply_markup=InlineKeyboardMarkup(keyboard),
-    )
+        await update.message.reply_text(
+            f"Results for: {movie_name}\n" + "\n\n\n".join(message),
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
 
 
 # TODO limit max length of message
@@ -69,7 +74,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     response = requests.post(url, json=payload, headers=headers)
     # TODO if response 2xx
-    await query.edit_message_text(f"Added movie with id {query.data} to watchlist")
+    await query.message.reply_text(f"Added movie with id {query.data} to watchlist")
     pass
 
 
